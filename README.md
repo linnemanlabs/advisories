@@ -10,7 +10,7 @@ Advisories and PoCs for vulnerabilities I have discovered during research. Links
 | [nm-l2tp](https://github.com/nm-l2tp/NetworkManager-l2tp) | 1 | 1 | LPE to root | soon | soon |
 | [open-iscsi](https://github.com/open-iscsi/open-iscsi) | ? | ? | Authorization bypass on control socket | soon | soon |
 | [open-isns](https://github.com/open-iscsi/open-isns) | ? | ? | ? | Embargo | Withheld |
-| [pi-hole](https://github.com/pi-hole/pi-hole/) | 5 | Pending | 2 authenticated-RCE, 2 root LPE, 1 file disclosure | [Pi-hole: root with extra steps](https://linnemanlabs.com/pi-hole-root-with-extra-steps) | [5 Available](/poc/pi-hole/) |
+| [pi-hole](https://github.com/pi-hole/pi-hole/) | 5 | Pending | 2 authenticated-RCE, 2 root LPE, 1 file disclosure | [Pi-hole: root with extra steps](https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps) | [5 Available](/poc/pi-hole/) |
 | [ceph](https://github.com/ceph/ceph) | 6 | Pending | Cross-tenant and cross-pool file disclosure | Embargo | Withheld |
 | [fprintd](https://gitlab.freedesktop.org/libfprint/fprintd) | 17 | 1 | Fingerprint bypass, LPE to root | soon | soon |
 
