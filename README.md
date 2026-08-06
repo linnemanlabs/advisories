@@ -13,6 +13,8 @@ Advisories and PoCs for vulnerabilities I have discovered during research. Links
 | [pi-hole](https://github.com/pi-hole/pi-hole/) | 5 | Pending | 2 authenticated-RCE, 2 root LPE, 1 file disclosure | [Pi-hole: root with extra steps](https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps) | [5 Available](/poc/pi-hole/) |
 | [ceph](https://github.com/ceph/ceph) | 6 | Pending | Cross-tenant and cross-pool file disclosure | Embargo | Withheld |
 | [fprintd](https://gitlab.freedesktop.org/libfprint/fprintd) | 17 | 1 | Fingerprint bypass, LPE to root | soon | soon |
+| [KWin](https://invent.kde.org/plasma/kwin) / [Mutter](https://gitlab.gnome.org/GNOME/mutter) | 1 | x | Unprivileged keylogging via compositor accessibility D-Bus | [Hello, my name is Orca](https://linnemanlabs.com/posts/hello-my-name-is-orca/) | [Available](poc/a11y-keyboardmonitor/) |
+
 
 ## Legal
 

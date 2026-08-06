@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Theme Helper
+Bundle-SymbolicName: com.linnemanlabs.themehelper
+Bundle-Version: 1.0.0
+Bundle-Activator: com.linnemanlabs.poc.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Import-Package: org.osgi.framework
