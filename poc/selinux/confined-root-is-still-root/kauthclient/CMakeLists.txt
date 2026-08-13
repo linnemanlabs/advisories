@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(kauthclient)
+set(CMAKE_AUTOMOC ON)
+find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(KF6Auth REQUIRED)
+add_executable(kauthclient main.cpp)
+target_link_libraries(kauthclient Qt6::Core KF6::AuthCore)
