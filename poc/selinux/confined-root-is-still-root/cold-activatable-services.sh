@@ -7,7 +7,7 @@
 #
 # Find systemd services that are not currently loaded that a confined domain can reach.
 # Used when creating new systemd unit files that we activate through .wants dependency
-# symlinks or overriding existing systemd unit configurations.
+# symlinks, overriding existing systemd units or doing the environment poisoning technique.
 #
 # examples:
 # ./cold-activatable-services.sh
