@@ -34,7 +34,7 @@ is_real(){ busctl call org.freedesktop.DBus /org/freedesktop/DBus org.freedeskto
 # confirm pivot service is cold this machine
 is_cold(){ busctl call $SD GetUnit s "$1" 2>&1 | grep -q 'not loaded'; }
 
-PIVOT_NAME= PIVOT_UNIT=
+PIVOT_NAME="" PIVOT_UNIT=""
 for pair in \
   "org.freedesktop.locale1        systemd-localed.service" \
   "org.freedesktop.PackageKit     packagekit.service" \
