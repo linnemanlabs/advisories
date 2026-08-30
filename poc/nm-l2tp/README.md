@@ -4,7 +4,7 @@ nm-l2tp fails to properly sanitize the VPN configuration from the local unprivil
 
 On SELinux enforcing systems, read the article for the full escape to unconfined root.
 
-Write-up is at [linnemanlabs.com/posts/nm-l2tp-newline-to-unconfined-root](https://linnemanlabs.com/posts/nm-l2tp-newline-to-unconfined-root)
+Write-up is at [linnemanlabs.com/posts/nm-l2tp-newline-to-unconfined-root](https://linnemanlabs.com/posts/nm-l2tp-newline-to-root)
 
 This vulnerability was assigned CVE-2026-19624.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # LinnemanLabs - nm-l2tp PoC - root exec from newline injection
-# https://linnemanlabs.com/posts/nm-l2tp-newline-to-unconfined-root
+# https://linnemanlabs.com/posts/nm-l2tp-newline-to-root
 #
 # CVE-2026-19624
 #
