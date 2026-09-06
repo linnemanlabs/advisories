@@ -534,16 +534,96 @@ func buildNotifyRaw(ntype uint16, data []byte) []byte {
 	return append(b, data...)
 }
 
-func selectChildSA(_ []byte, s *sa) []byte {
+func selectChildSA(saChild []byte, s *sa) []byte {
 	// pick the first proposal's transforms, assign a 4-byte ESP SPI.
 	s.childSPIi = randBytes(4)
-	// Minimal: echo a standard ESP proposal (AES-CBC-128 + HMAC-SHA2-256-128 + ESN none).
+	var cNum, cProto, cNumXf byte
+	var cXf []byte
+	var fNum, fProto, fNumXf byte
+	var fXf []byte
+	have := false
+	eachProposal(saChild, func(num, proto, numXf byte, spi, xf []byte) bool {
+		if !have {
+			fNum, fProto, fNumXf, fXf, have = num, proto, numXf, xf, true
+		}
+		if xfHasCBC(xf) {
+			cNum, cProto, cNumXf, cXf = num, proto, numXf, xf
+			return true
+		}
+		return false
+	})
+	if cXf == nil && have {
+		cNum, cProto, cNumXf, cXf = fNum, fProto, fNumXf, fXf
+	}
+	if cXf != nil {
+		fmt.Printf("[*] AUTH: child SA - selecting initiator proposal #%d (proto=%d, %d transforms), our SPI=%x\n", cNum, cProto, cNumXf, s.childSPIi)
+		return buildProposalRaw(cNum, cProto, cNumXf, s.childSPIi, cXf)
+	}
+	fmt.Println("[*] AUTH: child SA - could not parse initiator SA, using fallback")
 	transforms := [][]byte{
 		transform(tENCR, encrAES_CBC, 128),
 		transform(tINTEG, integHMAC_SHA2_256_128, 0),
 		transform(tESN, 0, 0),
 	}
-	return proposal(1, 3, s.childSPIi, transforms) // proto=3 (ESP)
+	return proposal(1, 3, s.childSPIi, transforms)
+}
+
+func eachProposal(sa []byte, cb func(num, proto, numXf byte, spi, xf []byte) bool) {
+	off := 0
+	for off+8 <= len(sa) {
+		more := sa[off]
+		plen := int(binary.BigEndian.Uint16(sa[off+2 : off+4]))
+		if plen < 8 || off+plen > len(sa) {
+			return
+		}
+		num := sa[off+4]
+		proto := sa[off+5]
+		spiSize := int(sa[off+6])
+		numXf := sa[off+7]
+		if 8+spiSize > plen {
+			return
+		}
+		spi := sa[off+8 : off+8+spiSize]
+		xf := sa[off+8+spiSize : off+plen]
+		if cb(num, proto, numXf, spi, xf) {
+			return
+		}
+		if more == 0 {
+			return
+		}
+		off += plen
+	}
+}
+
+func xfHasCBC(xf []byte) bool {
+	off := 0
+	for off+8 <= len(xf) {
+		tlen := int(binary.BigEndian.Uint16(xf[off+2 : off+4]))
+		if tlen < 8 || off+tlen > len(xf) {
+			return false
+		}
+		if xf[off+4] == tENCR && binary.BigEndian.Uint16(xf[off+6:off+8]) == uint16(encrAES_CBC) {
+			return true
+		}
+		if xf[off] == 0 {
+			return false
+		}
+		off += tlen
+	}
+	return false
+}
+
+func buildProposalRaw(num, proto, numXf byte, spi, xf []byte) []byte {
+	p := make([]byte, 8)
+	p[0] = 0 // last proposal
+	p[4] = num
+	p[5] = proto
+	p[6] = byte(len(spi))
+	p[7] = numXf
+	p = append(p, spi...)
+	p = append(p, xf...)
+	binary.BigEndian.PutUint16(p[2:], uint16(len(p)))
+	return p
 }
 
 // payload walking
