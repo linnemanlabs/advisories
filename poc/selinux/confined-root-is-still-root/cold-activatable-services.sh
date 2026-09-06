@@ -22,6 +22,13 @@ W=${1:-}
 # work in tmpdir, cleanup on exit
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 
+policy="$( grep ^SELINUXTYPE= /etc/selinux/config | awk -F '=' '{ print $2 }' )"
+if [ "${policy}" == "mls" ];then
+  defaultdom="init_t"
+else
+  defaultdom="unconfined_service_t"
+fi
+
 # currently-loaded unit names (a unit not in this list is unloaded)
 echo "[*] enumerating systemd loaded units"
 systemctl list-units --all --type=service --no-legend 2>/dev/null | awk '{gsub(/●/,""); print $1}' | tr -d ' ' | sort -u > "$TMP/loaded"
@@ -67,7 +74,7 @@ for f in /usr/share/dbus-1/system-services/*.service; do
     if [ -n "$exe" ] && [ -e "$exe" ]; then
       # actual on-disk label (what the type_transition fires on), instant vs matchpathcon
       lbl=$(ls -Zd "$exe" 2>/dev/null | awk '{print $1}' | cut -d: -f3)
-      dom=$(awk -v l="$lbl" '$1==l{print $2; exit}' "$TMP/trans"); [ -z "$dom" ] && dom="unconfined_service_t"
+      dom=$(awk -v l="$lbl" '$1==l{print $2; exit}' "$TMP/trans"); [ -z "$dom" ] && dom="${defaultdom}"
       grep -qxF "$dom" "$TMP/reach" && reach="yes($dom)" || reach="no($dom)"
     else
       # fragment/binary unresolvable -> reachability undetermined
