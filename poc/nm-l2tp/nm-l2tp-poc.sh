@@ -32,7 +32,7 @@ if [ -f /etc/selinux/config ];then
   if [ "${enforcing}" == "Enforcing" ];then
     echo "[*] selinux enforcing, will stage properly and escape"
   else
-    echo "[*] selinx not enforcing, will stage properly and escape anyway, why not"
+    echo "[*] selinux not enforcing, will stage properly and escape anyway, why not"
   fi
 fi
 
