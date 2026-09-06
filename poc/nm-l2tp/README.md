@@ -20,15 +20,27 @@ This vulnerability was assigned CVE-2026-19624.
 | **Last Vulnerable** | 1.52.2, 1.20.22, 1.8.8, 1.2.20, 1.0.14 |
 | **Fixed in** | 1.52.4, 1.20.24, 1.8.10, 1.2.22, 1.0.16, commit [95b6b46f](https://github.com/nm-l2tp/NetworkManager-l2tp/commit/95b6b46f48a0c9eabc79272cd313f219110ef91c) |
 
-Audited on Fedora 44 with NetworkManager 1.56.1 and NetworkManager-l2tp 1.52.2, and confirmed against upstream master at the time of reporting. Also tested the injection against RHEL 10 and Ubuntu 26.
+Audited on Fedora 44 with NetworkManager 1.56.1 and NetworkManager-l2tp 1.52.2, and confirmed against upstream master at the time of reporting.
+
+End-to-End exploit confirmed working against Fedora 44, RHEL 9, RHEL 10, openSUE Leap 16, SUSE SLES 16, Ubuntu 26, and Debian 13.
 
 ## Contents
 
 | File | Purpose |
-| [nm-l2tp-inject.py](nm-l2tp-inject.py) | performs the injection, fires the exploit. |
-| [nm-l2tp-responder.go](nm-l2tp-poc-responder.go) | minimal IKEv2 PSK responder. strongswan requires a real connection. Completes just the IKE SA so strongswan fires leftupdown, no real VPN server needed. Runs as unprivileged user. |
+| [nm-l2tp-poc.sh](nm-l2tp-poc.sh) | End-to-End exploit, configures responder, performs the injection, fires the exploit, performs post-exploit SELinux/AppArmor confinement escape. |
+| [nm-l2tp-inject.py](nm-l2tp-inject.py) | performs the injection and fires the exploit. |
+| [nm-l2tp-responder.py](nm-l2tp-poc-responder.py) | minimal Python IKEv2 PSK responder. strongswan and older libreswan require a real connection. Completes just the IKE SA so leftupdown fires, no real VPN server needed. Runs as unprivileged user. |
+| [nm-l2tp-responder.go](nm-l2tp-poc-responder.go) | minimal Go IKEv2 PSK responder. strongswan and older libreswan require a real connection. Completes just the IKE SA so leftupdown fires, no real VPN server needed. Runs as unprivileged user. |
 
 ## Usage
+
+Run the nm-l2tp-poc.sh for a single-script end-to-end exploit that wraps the other scripts, or run the separate components yourself.
+
+### End-to-End PoC
+
+Clone the repo, `./nm-l2tp-poc.sh` from a local login session.
+
+### Manual
 
 Run both as an ordinary unprivileged user (no sudo, no group membership required), on a host with a vulnerable NetworkManager-l2tp and an active local login session:
 
@@ -46,7 +58,7 @@ On SELinux enforcing, stage the payload as `container_file_t` (`chcon -t contain
 2. If you are targeting strongswan, start the local IKE responder and leave it running (defaults match the injector: 127.0.0.2:5500)
 
 ```
-go run nm-l2tp-responder.go
+python3 run nm-l2tp-responder.py
 ```
 
 3. Run the injection (from a local login session, not ssh)
@@ -63,7 +75,7 @@ The injected `leftupdown` runs as root once the IKE SA establishes. If you want 
 
 - `python3`, `python3-dbus` (the D-Bus injector)
 - local login session, not ssh
-- if targeting strongswan: `go` or a real vpn peer
+- if targeting strongswan/older libreswan: responder PoC or a real vpn peer
 
 ## Cleanup
 
@@ -75,7 +87,7 @@ nmcli -t -f UUID,NAME connection show | awk -F ':' '$2=="linnemanlabs-poc"{print
 
 Run from the same local login session.
 
-PoC leaves behind `/run/nm-l2tp-<uuid>/` directories you can delete also.
+PoC may leave behind `/run/nm-l2tp-<uuid>/` directories you can delete also.
 
 ## Legal
 

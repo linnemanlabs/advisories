@@ -3,7 +3,7 @@
 # LinnemanLabs - nm-l2tp PoC - root exec from newline injection
 # CVE-2026-19624
 #
-# https://linnemanlabs.com/posts/nm-l2tp-newline-to-root
+# https://linnemanlabs.com/posts/nm-l2tp-newline-to-root/
 # https://github.com/linnemanlabs/advisories/
 #
 # Runs as unprivileged local user. Creates L2TP vpn connection with newline and additional config

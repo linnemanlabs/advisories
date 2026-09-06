@@ -1,7 +1,9 @@
 # no shebang to avoid mime-type fingerprint, run with "python3 nm-l2tp-responder.py"
 #
 # LinnemanLabs - nm-l2tp PoC - minimal IKEv2 PSK responder
+#
 # https://linnemanlabs.com/posts/nm-l2tp-newline-to-root
+# https://github.com/linnemanlabs/advisories/
 #
 # CVE-2026-19624
 #
