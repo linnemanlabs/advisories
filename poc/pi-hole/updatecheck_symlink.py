@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 #
-# LinnemanLabs - updatecheck symlink swap PoC
+# LinnemanLabs - updatecheck symlink swap PoC, arbitrary file disclosure to pihole user
 #
-# https://linnemanlabs.com/pi-hole-root-with-extra-steps
+# https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps/
 # https://github.com/linnemanlabs/advisories/
+#
+# https://github.com/pi-hole/pi-hole/security/advisories/GHSA-xch2-4qxw-g5vj
 #
 # run as pihole user, leave it running, wait for the next "pihole updatechecker" cron (daily, @reboot)
 # this PoC makes /etc/shadow world-readable
+#
+# unfixed as of FTL 6.7.1 (current)
 #
 TARGET = "/etc/shadow"
 

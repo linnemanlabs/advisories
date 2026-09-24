@@ -1,13 +1,18 @@
 #!/bin/bash
 #
-# LinnemanLabs - pi-hole civetweb advancedopts PoC
+# LinnemanLabs - pi-hole civetweb advancedopts PoC, web-session to pihole exec
 # CVE-2026-65963
 #
-# https://linnemanlabs.com/pi-hole-root-with-extra-steps
+# https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps/
 # https://github.com/linnemanlabs/advisories/
 #
-# uses web login to run CMD on the remote pi-hole host
+# https://github.com/pi-hole/FTL/security/advisories/GHSA-8j7w-m3cr-6q6x
+#
+# uses web login to run CMD on the remote pi-hole host.
+# uses teleporter to stage the Lua script.
 # default CMD prints id and caps to /tmp/exec-proof
+#
+# works on FTL 6.3 - 6.6.2
 #
 PIPASS="password"
 PIHOST="192.168.1.1"

