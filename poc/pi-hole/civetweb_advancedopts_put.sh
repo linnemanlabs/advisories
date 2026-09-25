@@ -16,8 +16,9 @@
 #
 # works on FTL <= 6.7
 #
-PIPASS="password"
-PIHOST="http://pi.hole"
+PIHOST="${PIHOST:-http://pi.hole}"
+PIPASS="${PIPASS:-password}"
+
 LUACMD="hostname;uptime;id;grep ^Cap /proc/self/status;pihole version"
 do_cleanup=false
 

