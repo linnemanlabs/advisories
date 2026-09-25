@@ -37,8 +37,8 @@ These PoCs modify live Pi-hole configuration and may alter DHCP leases, root’s
 | Chain PoC                     | Ran on                | Affected | Fixed  | Result      |
 | ----------------------------- | --------------------- | -------- | ------ | ----------- |
 | [chain_dnsmasq_logrotate_root.sh](https://github.com/linnemanlabs/advisories/blob/main/poc/pi-hole/chain_dnsmasq_logrotate_root.sh)        | FTL 6.6.2 /Core 6.4.2 | ≤6.7     | 6.7.1  | web -> root |
-| [chain_part2.sh](https://github.com/linnemanlabs/advisories/blob/main/poc/pi-hole/chain_part2.sh)                | FTL 6.7 / Core 6.4.3  | ≤6.7     | 6.7.1  | web -> root |
-| [chain_part3.sh](https://github.com/linnemanlabs/advisories/blob/main/poc/pi-hole/chain_part3.sh)                | FTL 6.7 / Core 6.4.3  | ≤6.7     | 6.7.1  | web -> root |
+| [chain_advancedopts_webdav_capchown.sh](https://github.com/linnemanlabs/advisories/blob/main/poc/pi-hole/chain_advancedopts_webdav_capchown.sh)                | FTL 6.7 / Core 6.4.3  | ≤6.7     | 6.7.1  | web -> root |
+| [chain_logpoison_lp_capchown.sh](https://github.com/linnemanlabs/advisories/blob/main/poc/pi-hole/chain_logpoison_lp_capchown.sh)                | FTL 6.7 / Core 6.4.3  | ≤6.7     | 6.7.1  | web -> root |
 
 The end-to-end chain combines vulnerabilities to go from web-session to pi-hole code-exec, then escalate to root code-exec.
 

